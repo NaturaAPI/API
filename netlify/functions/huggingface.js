@@ -1,12 +1,12 @@
+// Netlify Functions example with CORS headers
 const fetch = require('node-fetch');
 
 exports.handler = async (event) => {
-  // CORS 설정
   const headers = {
-    "Access-Control-Allow-Origin": "*",  // 모든 도메인에서 접근 허용
-    "Access-Control-Allow-Methods": "POST, OPTIONS",  // 허용된 메서드
-    "Access-Control-Allow-Headers": "Content-Type, Authorization",  // 허용된 헤더
-    "Content-Type": "application/json"  // JSON 응답
+    "Access-Control-Allow-Origin": "*",  // 모든 출처에서 접근 허용
+    "Access-Control-Allow-Methods": "POST, OPTIONS",  // 허용하는 HTTP 메소드
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",  // 허용하는 헤더
+    "Content-Type": "application/json"
   };
 
   // OPTIONS 요청 처리 (Preflight 대응)
@@ -19,7 +19,6 @@ exports.handler = async (event) => {
   }
 
   const API_KEY = process.env.HUGGINGFACE_API_KEY;
-
   if (!API_KEY) {
     return {
       statusCode: 500,
@@ -29,13 +28,12 @@ exports.handler = async (event) => {
   }
 
   try {
-    // 요청 본문 파싱
     const body = JSON.parse(event.body);
     if (!body.text) {
       return {
         statusCode: 400,
         headers,
-        body: JSON.stringify({ error: "'text' 필드가 필요합니다." })
+        body: JSON.stringify({ error: "입력 값이 없습니다. 'text' 필드가 필요합니다." })
       };
     }
 
@@ -64,10 +62,10 @@ exports.handler = async (event) => {
     }
 
     const data = await response.json();
-
+    
     return {
       statusCode: 200,
-      headers,  // CORS 헤더 포함
+      headers,  // CORS 설정 유지
       body: JSON.stringify(data)
     };
   } catch (error) {
