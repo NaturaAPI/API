@@ -51,8 +51,12 @@ document.addEventListener("DOMContentLoaded", function () {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
+                        "Access-Control-Allow-Origin": "*", // CORS 헤더 추가
+                        "Access-Control-Allow-Methods": "POST, OPTIONS", 
+                        "Access-Control-Allow-Headers": "Content-Type, Authorization"
                     },
                     body: JSON.stringify({ text: message }),
+                    credentials: "omit"
                 });
 
                 const data = await response.json();
