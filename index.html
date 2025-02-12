@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="description" content="NaturaLink">
+    <meta property="og:title" content="NaturaLink">
+    <meta property="og:description" content="NaturaLink">
+    <title>NaturaLink</title>
+    <link rel="icon" href="favicons/favicon.ico" type="image/x-icon">
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+
+    <!-- 폰트 -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+
+    <!-- CSS 파일 -->
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/chat.css">
+    <link rel="stylesheet" href="css/setting.css">
+
+    <!-- 🔹 첫 번째 사용자 클릭 시 전체 화면 실행 -->
+    <script>
+        document.addEventListener("pointerdown", function enableFullScreenOnce() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.warn("⚠️ 전체 화면 실행 실패:", err.message);
+                });
+            }
+            document.removeEventListener("pointerdown", enableFullScreenOnce); // ✅ 한 번 실행 후 제거
+        });
+    </script>
+</head>
+<body>
+    <header>
+        <h1><a href="/NaturaLink/">NaturaLink</a></h1> <!-- 수정된 링크 경로 -->
+
+        <!-- ⚙️ 설정 버튼 -->
+        <div class="settings-container">
+            <button id="settings-btn">⚙️</button>
+            <div id="settings-menu" class="hidden">
+                <button id="fullscreen-btn">🖥️ 전체 화면</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 탭 메뉴 -->
+    <div class="tabs">
+        <div class="tab active" data-tab="search">검색</div>
+        <div class="tab" data-tab="link">링크 복사</div>
+        <div class="tab" data-tab="ai">AI</div>
+    </div>
+
+    <!-- 검색 탭 -->
+    <div class="content show" id="search">
+        <script async src="https://cse.google.com/cse.js?cx=00d831986d20a4627"></script>
+        <div class="gcse-search"></div>
+    </div>
+
+    <!-- 링크 복사 탭 -->
+    <div class="content" id="link">
+        <h2>링크 복사</h2>
+        <p>NaturaLink 링크를 복사하려면 아래 버튼을 클릭하세요.</p>
+        <button id="copyBtn">🔗 링크 복사</button>
+    </div>
+
+    <!-- AI 챗봇 탭 -->
+    <div class="content" id="ai">
+        <h2>AI 챗봇</h2>
+
+        <!-- ✅ 모델 선택 UI -->
+        <label for="modelSelector">모델 선택:</label>
+        <select id="modelSelector">
+            <option value="gemma">Gemma (기본)</option>
+            <option value="blenderbot">blenderbot</option>
+            <option value="gpt2Medium">TEST</option> <!-- GPT-2 Medium 옵션 추가 -->
+        </select>
+
+        <div id="chatbox">
+            <div id="chatlogs"></div>
+            <div id="userInputContainer">
+                <input type="text" id="userInput" placeholder="질문을 입력하세요..." />
+                <button id="sendMessageBtn">보내기</button>
+            </div>
+            <div id="typingIndicator" class="typing-indicator" style="display: none;">AI가 입력 중...</div>
+        </div>
+        <button id="clearChatBtn">🗑️ 대화 지우기</button>
+    </div>
+
+    <!-- PWA 설치 버튼 -->
+    <button id="install-button" style="display: none;">📲 앱 설치</button>
+
+    <!-- JavaScript -->
+    <script src="js/chat.js"></script>  <!-- ✅ 챗봇 기능 -->
+    <script src="js/pwa.js"></script>   <!-- ✅ PWA 기능 -->
+    <script src="js/script.js"></script> <!-- ✅ UI 기능 (탭 전환, 버튼 등) -->
+    <script src="js/setting.js"></script> <!-- ✅ 설정 관련 JS 추가 -->
+
+    <!-- 서비스 워커 등록 -->
+    <script>
+    if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("/NaturaLink/service-worker.js", { scope: "/NaturaLink/" })
+            .then((registration) => {
+                console.log("✅ 서비스 워커가 등록되었습니다.");
+                if (registration.waiting) {
+                    registration.waiting.postMessage({ action: "skipWaiting" });
+                }
+            })
+            .catch(error => console.error("❌ 서비스 워커 등록 실패:", error));
+
+        navigator.serviceWorker.addEventListener("message", (event) => {
+            if (event.data.action === "reload") {
+                window.location.reload();
+            }
+        });
+    }
+</script>
+</body>
+</html>
