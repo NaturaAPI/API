@@ -1,49 +1,108 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>챗봇 테스트</title>
-    <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
-        input, button { margin-top: 10px; padding: 10px; font-size: 16px; }
-        #response { margin-top: 20px; white-space: pre-wrap; }
-    </style>
-</head>
-<body>
+document.addEventListener("DOMContentLoaded", function () {
+    console.log("✅ 챗봇 스크립트 로드 완료!");
 
-    <h1>Hugging Face 챗봇</h1>
-    <input type="text" id="userInput" placeholder="메시지를 입력하세요">
-    <button onclick="sendMessage()">전송</button>
+    const API_ENDPOINTS = {
+        gemma: "https://beamish-melba-ba4300.netlify.app/api/huggingface"
+    };
 
-    <h2>챗봇 응답:</h2>
-    <div id="response"></div>
+    const chatlogs = document.getElementById("chatlogs");
+    const userInput = document.getElementById("userInput");
+    const sendMessageBtn = document.getElementById("sendMessageBtn");
+    const clearChatBtn = document.getElementById("clearChatBtn");
 
-    <script>
-        async function sendMessage() {
-            const userMessage = document.getElementById("userInput").value;
-            if (!userMessage) {
-                alert("메시지를 입력하세요!");
-                return;
-            }
+    if (!sendMessageBtn) return;
 
-            try {
-                const response = await fetch('https://beamish-melba-ba4300.netlify.app/api/huggingface', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ text: userMessage })
+    let selectedModel = "gemma"; // 기본 모델: Gemma
+
+    // 모델 선택 UI 요소 제거
+    const modelSelector = document.getElementById("modelSelector");
+    if (modelSelector) {
+        modelSelector.remove(); // 모델 선택 UI 제거
+    }
+
+    function loadChatHistory() {
+        const savedChat = JSON.parse(localStorage.getItem("chatCache")) || [];
+        savedChat.forEach(({ role, message }) => {
+            addMessage(role, message, false);
+        });
+    }
+
+    function addMessage(role, message, animate = true) {
+        const msgDiv = document.createElement("div");
+        msgDiv.classList.add("chat-bubble", role === "user" ? "user-message" : "ai-message");
+        msgDiv.textContent = message;
+
+        if (animate) msgDiv.style.animation = "fadeIn 0.3s ease-in-out";
+        
+        chatlogs.appendChild(msgDiv);
+        chatlogs.scrollTop = chatlogs.scrollHeight;
+    }
+
+    async function sendMessage() {
+        const message = userInput.value.trim();
+        if (!message) return;
+
+        addMessage("user", message);
+        saveChatHistory("user", message);
+        userInput.value = "";
+
+        addMessage("ai", "🧠 생각 중...", false);
+
+        try {
+            const cachedResponse = getCachedResponse(message);
+            if (cachedResponse) {
+                chatlogs.lastChild.remove();
+                addMessage("ai", cachedResponse);
+            } else {
+                const response = await fetch(API_ENDPOINTS[selectedModel], {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ text: message }),
+                    credentials: "omit"
                 });
 
                 const data = await response.json();
-                document.getElementById("response").textContent = JSON.stringify(data, null, 2);
-            } catch (error) {
-                console.error('오류 발생:', error);
-                document.getElementById("response").textContent = "API 요청 실패!";
-            }
-        }
-    </script>
+                chatlogs.lastChild.remove();
+                const aiResponse = data.response || data[0]?.generated_text || "⚠️ 응답을 가져올 수 없습니다.";
 
-</body>
-</html>
+                addMessage("ai", aiResponse);
+                saveChatHistory("ai", aiResponse, message);
+            }
+        } catch (error) {
+            chatlogs.lastChild.remove();
+            addMessage("ai", "⚠️ 네트워크 오류 발생! 다시 시도해주세요.");
+        }
+    }
+
+    function saveChatHistory(role, message, input = "") {
+        const chatHistory = JSON.parse(localStorage.getItem("chatCache")) || [];
+        chatHistory.push({ role, message, input });
+
+        if (chatHistory.length > 50) chatHistory.shift();
+        
+        localStorage.setItem("chatCache", JSON.stringify(chatHistory));
+    }
+
+    function getCachedResponse(input) {
+        const cache = JSON.parse(localStorage.getItem("chatCache")) || [];
+        const cachedEntry = cache.find(entry => entry.role === "ai" && entry.input === input);
+        return cachedEntry ? cachedEntry.message : null;
+    }
+
+    function clearChatHistory() {
+        localStorage.removeItem("chatCache");
+        chatlogs.innerHTML = "";
+        console.log("🗑️ 대화 기록이 삭제되었습니다.");
+    }
+
+    sendMessageBtn.addEventListener("click", sendMessage);
+    userInput.addEventListener("keypress", (event) => {
+        if (event.key === "Enter") sendMessage();
+    });
+    
+    if (clearChatBtn) {
+        clearChatBtn.addEventListener("click", clearChatHistory);
+    }
+
+    loadChatHistory();
+});
