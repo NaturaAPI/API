@@ -1,10 +1,11 @@
+// Netlify Functions example with CORS headers
 const fetch = require('node-fetch');
 
 exports.handler = async (event) => {
   const headers = {
-    "Access-Control-Allow-Origin": "*",  // 모든 출처에서 접근 허용
+    "Access-Control-Allow-Origin": "https://insect5386.github.io",  // 특정 도메인만 허용
     "Access-Control-Allow-Methods": "POST, OPTIONS",  // 허용하는 HTTP 메소드
-    "Access-Control-Allow-Headers": "Content-Type, Authorization, Access-Control-Allow-Methods",  // 허용하는 헤더에 'Access-Control-Allow-Methods' 추가
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",  // 허용하는 헤더
     "Content-Type": "application/json"
   };
 
@@ -76,3 +77,4 @@ exports.handler = async (event) => {
     };
   }
 };
+
