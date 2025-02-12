@@ -4,15 +4,15 @@
   "description": "Netlify Functions using node-fetch",
   "main": "index.js",
   "scripts": {
-    "start": "netlify dev",
-    "deploy": "netlify deploy"
+    "start": "netlify dev",  // 로컬에서 테스트할 때 사용
+    "deploy": "netlify deploy"  // 배포할 때 사용
   },
   "dependencies": {
-    "node-fetch": "^2.6.1"
+    "node-fetch": "^3.0.0"  // 최신 버전 사용 (ESM 지원)
   },
   "devDependencies": {},
   "engines": {
-    "node": "14.x"
+    "node": "16.x"  // 최신 Node.js 버전
   },
   "repository": {
     "type": "git",
