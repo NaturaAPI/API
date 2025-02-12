@@ -1,16 +1,20 @@
 const fetch = require('node-fetch');
 
-exports.handler = async (event, context) => {
-  // OPTIONS 요청 처리 (CORS preflight)
-  if (event.httpMethod === 'OPTIONS') {
+exports.handler = async (event) => {
+  // CORS 설정 추가
+  const headers = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type",
+    "Content-Type": "application/json"
+  };
+
+  // OPTIONS 요청에 대한 CORS 처리 (Preflight 대응)
+  if (event.httpMethod === "OPTIONS") {
     return {
       statusCode: 200,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type, Authorization"
-      },
-      body: ""
+      headers,
+      body: "CORS Preflight OK"
     };
   }
 
@@ -20,16 +24,22 @@ exports.handler = async (event, context) => {
   if (!API_KEY) {
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: "API 키가 설정되지 않았습니다." }),
-      headers: {
-        "Access-Control-Allow-Origin": "*",  // CORS 허용
-      },
+      headers,
+      body: JSON.stringify({ error: "API 키가 설정되지 않았습니다." })
     };
   }
 
   try {
-    // 요청 본문에서 사용자 입력 가져오기
-    const user_input = JSON.parse(event.body).text;
+    const body = JSON.parse(event.body);
+    if (!body.text) {
+      return {
+        statusCode: 400,
+        headers,
+        body: JSON.stringify({ error: "입력 값이 없습니다. 'text' 필드가 필요합니다." })
+      };
+    }
+
+    const user_input = body.text; // 입력된 메시지
 
     // Hugging Face API 호출
     const response = await fetch("https://api-inference.huggingface.co/models/google/gemma-2-2b-it", {
@@ -39,7 +49,7 @@ exports.handler = async (event, context) => {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        inputs: user_input,
+        inputs: user_input, // "text"가 아닌 "inputs" 필드 사용
         parameters: {
           max_tokens: 100,
           temperature: 0.1,
@@ -54,21 +64,18 @@ exports.handler = async (event, context) => {
     }
 
     const data = await response.json();
+    
     return {
       statusCode: 200,
-      body: JSON.stringify(data),
-      headers: {
-        "Access-Control-Allow-Origin": "*",  // CORS 허용
-      },
+      headers,
+      body: JSON.stringify(data)
     };
   } catch (error) {
-    console.error("Error:", error);  // 추가된 디버깅 로그
+    console.error("Error:", error);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: error.message }),
-      headers: {
-        "Access-Control-Allow-Origin": "*",  // CORS 허용
-      },
+      headers,
+      body: JSON.stringify({ error: error.message })
     };
   }
 };
