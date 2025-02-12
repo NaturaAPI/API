@@ -1,12 +1,12 @@
 const fetch = require('node-fetch');
 
 exports.handler = async (event) => {
-  // CORS 설정 추가
+  // CORS 설정
   const headers = {
-    "Access-Control-Allow-Origin": "*", // 모든 출처에서 접근 허용
-    "Access-Control-Allow-Methods": "POST, OPTIONS", // 허용된 메서드
-    "Access-Control-Allow-Headers": "Content-Type, Authorization", // 허용된 헤더
-    "Content-Type": "application/json" // 응답 형식 설정
+    "Access-Control-Allow-Origin": "*",  // 모든 도메인에서 접근 허용
+    "Access-Control-Allow-Methods": "POST, OPTIONS",  // 허용된 메서드
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",  // 허용된 헤더
+    "Content-Type": "application/json"  // JSON 응답
   };
 
   // OPTIONS 요청 처리 (Preflight 대응)
@@ -18,10 +18,8 @@ exports.handler = async (event) => {
     };
   }
 
-  // Hugging Face API 키
   const API_KEY = process.env.HUGGINGFACE_API_KEY;
 
-  // API 키가 설정되지 않은 경우 처리
   if (!API_KEY) {
     return {
       statusCode: 500,
@@ -31,12 +29,13 @@ exports.handler = async (event) => {
   }
 
   try {
+    // 요청 본문 파싱
     const body = JSON.parse(event.body);
     if (!body.text) {
       return {
         statusCode: 400,
         headers,
-        body: JSON.stringify({ error: "입력 값이 없습니다. 'text' 필드가 필요합니다." })
+        body: JSON.stringify({ error: "'text' 필드가 필요합니다." })
       };
     }
 
@@ -60,7 +59,6 @@ exports.handler = async (event) => {
       })
     });
 
-    // API 응답 오류 처리
     if (!response.ok) {
       throw new Error(`API 요청 실패: ${response.status} ${response.statusText}`);
     }
@@ -69,7 +67,7 @@ exports.handler = async (event) => {
 
     return {
       statusCode: 200,
-      headers, // CORS 설정 유지
+      headers,  // CORS 헤더 포함
       body: JSON.stringify(data)
     };
   } catch (error) {
