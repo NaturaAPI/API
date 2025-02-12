@@ -56,19 +56,20 @@ exports.handler = async (event) => {
       })
     });
 
-    // 응답이 올바른지 확인
+    // 응답 상태 체크
     if (!response.ok) {
       const errorMessage = `API 요청 실패: ${response.status} ${response.statusText}`;
       console.error(errorMessage);
       throw new Error(errorMessage);
     }
 
-    // 응답 본문 텍스트로 확인 후 JSON 파싱
-    const data = await response.json();
+    const responseText = await response.text(); // 응답을 텍스트로 먼저 읽기
+    console.log("API Response:", responseText); // 응답 내용 로그
+    const data = JSON.parse(responseText); // 이후 JSON으로 파싱
 
     return {
       statusCode: 200,
-      headers,  // CORS 설정 유지
+      headers,
       body: JSON.stringify(data)
     };
   } catch (error) {
