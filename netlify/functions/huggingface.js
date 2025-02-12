@@ -63,13 +63,8 @@ exports.handler = async (event) => {
       throw new Error(errorMessage);
     }
 
-    // 응답 본문 텍스트로 확인
-    const text = await response.text();
-    if (text.trim() === "") {
-      throw new Error("빈 응답이 반환되었습니다.");
-    }
-
-    const data = JSON.parse(text);
+    // 응답 본문 텍스트로 확인 후 JSON 파싱
+    const data = await response.json();
 
     return {
       statusCode: 200,
@@ -81,7 +76,7 @@ exports.handler = async (event) => {
     return {
       statusCode: 500,
       headers,
-      body: JSON.stringify({ error: error.message })
+      body: JSON.stringify({ error: error.message, stack: error.stack })
     };
   }
 };
