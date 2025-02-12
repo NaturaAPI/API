@@ -2,7 +2,7 @@ const fetch = require('node-fetch');
 
 exports.handler = async (event) => {
   const headers = {
-    "Access-Control-Allow-Origin": "*", // 모든 도메인 허용
+    "Access-Control-Allow-Origin": "*",  // 모든 도메인 허용
     "Access-Control-Allow-Methods": "POST, OPTIONS", // 허용할 메소드
     "Access-Control-Allow-Headers": "Content-Type, Authorization", // 허용할 헤더
     "Content-Type": "application/json"
@@ -56,12 +56,21 @@ exports.handler = async (event) => {
       })
     });
 
+    // 응답이 올바른지 확인
     if (!response.ok) {
-      throw new Error(`API 요청 실패: ${response.status} ${response.statusText}`);
+      const errorMessage = `API 요청 실패: ${response.status} ${response.statusText}`;
+      console.error(errorMessage);
+      throw new Error(errorMessage);
     }
 
-    const data = await response.json();
-    
+    // 응답 본문 텍스트로 확인
+    const text = await response.text();
+    if (text.trim() === "") {
+      throw new Error("빈 응답이 반환되었습니다.");
+    }
+
+    const data = JSON.parse(text);
+
     return {
       statusCode: 200,
       headers,  // CORS 설정 유지
@@ -76,4 +85,3 @@ exports.handler = async (event) => {
     };
   }
 };
-
