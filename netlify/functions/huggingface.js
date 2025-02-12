@@ -1,6 +1,19 @@
 const fetch = require('node-fetch');
 
 exports.handler = async (event, context) => {
+  // OPTIONS 요청 처리 (CORS preflight)
+  if (event.httpMethod === 'OPTIONS') {
+    return {
+      statusCode: 200,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type, Authorization"
+      },
+      body: ""
+    };
+  }
+
   // 환경 변수에서 Hugging Face API 키 가져오기
   const API_KEY = process.env.HUGGINGFACE_API_KEY;
 
