@@ -1,0 +1,28 @@
+{
+  "name": "my-netlify-functions",
+  "version": "1.0.0",
+  "description": "Netlify Functions using node-fetch",
+  "main": "index.js",
+  "scripts": {
+    "start": "netlify dev",
+    "deploy": "netlify deploy"
+  },
+  "dependencies": {
+    "node-fetch": "^2.6.1"
+  },
+  "devDependencies": {},
+  "engines": {
+    "node": "14.x"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/NaturaAPI/API"
+  },
+  "keywords": [
+    "netlify",
+    "serverless",
+    "node-fetch"
+  ],
+  "author": "bulwe",
+  "license": "MIT"
+}
