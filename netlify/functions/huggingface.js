@@ -1,6 +1,6 @@
-const fetch = require('node-fetch');
+import fetch from 'node-fetch';
 
-exports.handler = async (event) => {
+export const handler = async (event) => {
   const headers = {
     "Access-Control-Allow-Origin": "*",  // 모든 도메인 허용
     "Access-Control-Allow-Methods": "POST, OPTIONS", // 허용할 메소드
