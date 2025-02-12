@@ -5,11 +5,11 @@ exports.handler = async (event) => {
   const headers = {
     "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization",
     "Content-Type": "application/json"
   };
 
-  // OPTIONS 요청에 대한 CORS 처리 (Preflight 대응)
+  // OPTIONS 요청 처리 (Preflight 대응)
   if (event.httpMethod === "OPTIONS") {
     return {
       statusCode: 200,
@@ -18,7 +18,6 @@ exports.handler = async (event) => {
     };
   }
 
-  // 환경 변수에서 Hugging Face API 키 가져오기
   const API_KEY = process.env.HUGGINGFACE_API_KEY;
 
   if (!API_KEY) {
@@ -39,7 +38,7 @@ exports.handler = async (event) => {
       };
     }
 
-    const user_input = body.text; // 입력된 메시지
+    const user_input = body.text;
 
     // Hugging Face API 호출
     const response = await fetch("https://api-inference.huggingface.co/models/google/gemma-2-2b-it", {
@@ -49,7 +48,7 @@ exports.handler = async (event) => {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        inputs: user_input, // "text"가 아닌 "inputs" 필드 사용
+        inputs: user_input,
         parameters: {
           max_tokens: 100,
           temperature: 0.1,
@@ -67,7 +66,7 @@ exports.handler = async (event) => {
     
     return {
       statusCode: 200,
-      headers,
+      headers,  // CORS 설정 유지
       body: JSON.stringify(data)
     };
   } catch (error) {
@@ -79,3 +78,4 @@ exports.handler = async (event) => {
     };
   }
 };
+
