@@ -2,7 +2,7 @@ import fetch from 'node-fetch';
 
 exports.handler = async (event) => {
   const headers = {
-    "Access-Control-Allow-Origin": "https://insect5386.github.io/NaturaLink", // 정확한 도메인만 허용
+    "Access-Control-Allow-Origin": "*",  // 모든 출처에서 접근 허용
     "Access-Control-Allow-Methods": "POST, OPTIONS", // 허용할 메소드
     "Access-Control-Allow-Headers": "Content-Type, Authorization", // 허용할 헤더
     "Content-Type": "application/json"
