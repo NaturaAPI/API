@@ -50,10 +50,10 @@ exports.handler = async (event) => {
       body: JSON.stringify({
         inputs: user_input,
         parameters: {
-          max_tokens: 100,
-          temperature: 0.1,
-          top_p: 0.9,
-          repetition_penalty: 1.2
+          max_tokens: 50,
+          temperature: 0.3,
+          top_p: 0.8,
+          repetition_penalty: 1.1
         }
       })
     });
